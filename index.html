@@ -70,7 +70,7 @@
     .life.deducted {
       opacity: 0.3;
     }
-    .button {
+    .button, .reset-button {
       margin-top: 10px;
       padding: 10px 20px;
       background-color: #ff4136;
@@ -80,7 +80,7 @@
       font-size: 0.7em;
       border-radius: 5px;
     }
-    .button:active {
+    .button:active, .reset-button:active {
       background-color: #d32f2f;
     }
     #students-container {
@@ -187,7 +187,6 @@
           const life = document.createElement('div');
           life.classList.add('life');
           life.id = `life-${classIndex}-${studentIndex}-${i}`;
-          // Remove the 'deducted' class if this heart should be active
           if (i > student.lives) {
             life.classList.add('deducted');
           }
@@ -214,6 +213,13 @@
 
         studentsContainer.appendChild(studentDiv);
       });
+
+      // Create a reset button for the entire class
+      const resetButton = document.createElement('button');
+      resetButton.classList.add('reset-button');
+      resetButton.textContent = 'Reset Class';
+      resetButton.onclick = () => resetClass(classIndex);
+      studentsContainer.appendChild(resetButton);
 
       studentsContainer.style.display = 'grid';
     }
@@ -254,6 +260,13 @@
           heart.classList.add('deducted');
         }
       });
+    }
+
+    function resetClass(classIndex) {
+      // Reset all students' lives to 3 for the selected class
+      classes[classIndex].students.forEach(student => student.lives = 3);
+      saveClasses(classes);
+      showStudents(classIndex);
     }
 
     document.getElementById("class-select").addEventListener("change", function() {
