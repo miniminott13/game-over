@@ -44,10 +44,6 @@
       padding: 15px;
       border-radius: 10px;
       width: 150px;
-      transition: background-color 0.3s ease;
-    }
-    .student.absent {
-      background-color: #888; /* Grey for absent students */
     }
     .student-name {
       display: block;
@@ -74,8 +70,11 @@
     .life.deducted {
       opacity: 0.3;
     }
-    .life.game-over {
-      background-color: #ff4136;
+    .game-over {
+      background-color: grey;
+    }
+    .absent {
+      background-color: #808080;
     }
     .button, .reset-button {
       margin-top: 10px;
@@ -102,23 +101,10 @@
       border: 1px solid white;
       border-radius: 5px;
     }
-    .absent-button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #f39c12;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-size: 0.7em;
-      border-radius: 5px;
-    }
-    .absent-button:active {
-      background-color: #d35400;
-    }
   </style>
 </head>
 <body>
-  <h1>Game Start</h1>
+  <h1>Behavior Chart</h1>
 
   <label for="class-select">Select Class:</label>
   <select id="class-select">
@@ -182,7 +168,7 @@
 
     function populateClassDropdown() {
       const selectElement = document.getElementById("class-select");
-      defaultClasses.forEach((classData, index) => {
+      classes.forEach((classData, index) => {
         const option = document.createElement("option");
         option.value = index;
         option.textContent = classData.className;
@@ -198,14 +184,8 @@
       classData.students.forEach((student, studentIndex) => {
         const studentDiv = document.createElement('div');
         studentDiv.classList.add('student');
-        
-        // Mark student as absent with greyed-out background
-        if (student.absent) {
-          studentDiv.classList.add('absent');
-        }
-
-        const studentName = student.lives > 0 ? student.name : 'Absent';
-        studentDiv.innerHTML = `<span class="student-name">${studentName}</span>`;
+        studentDiv.classList.add(student.lives === 0 ? 'game-over' : student.absent ? 'absent' : '');
+        studentDiv.innerHTML = `<span class="student-name">${student.name}</span>`;
 
         const lifeBar = document.createElement('div');
         lifeBar.classList.add('life-bar');
@@ -216,9 +196,6 @@
           if (i > student.lives) {
             life.classList.add('deducted');
           }
-          if (student.lives === 0) {
-            life.classList.add('game-over');
-          }
           lifeBar.appendChild(life);
         }
         studentDiv.appendChild(lifeBar);
@@ -226,16 +203,12 @@
         const deductButton = document.createElement('button');
         deductButton.classList.add('button');
         deductButton.textContent = `Deduct Life`;
-        deductButton.onclick = () => {
-          deductLife(classIndex, studentIndex);
-        };
+        deductButton.onclick = () => deductLife(classIndex, studentIndex);
 
         const addButton = document.createElement('button');
         addButton.classList.add('button');
         addButton.textContent = `Add Life`;
-        addButton.onclick = () => {
-          addLife(classIndex, studentIndex);
-        };
+        addButton.onclick = () => addLife(classIndex, studentIndex);
 
         studentDiv.appendChild(deductButton);
         studentDiv.appendChild(addButton);
@@ -243,55 +216,89 @@
         studentsContainer.appendChild(studentDiv);
       });
 
-      // Create a button to mark multiple students as absent
       const absentButton = document.createElement('button');
-      absentButton.classList.add('absent-button');
+      absentButton.classList.add('button');
       absentButton.textContent = 'Mark Absent';
       absentButton.onclick = () => markAbsent(classIndex);
       studentsContainer.appendChild(absentButton);
 
+      const resetButton = document.createElement('button');
+      resetButton.classList.add('reset-button');
+      resetButton.textContent = 'Reset Class';
+      resetButton.onclick = () => resetClass(classIndex);
+      studentsContainer.appendChild(resetButton);
+
       studentsContainer.style.display = 'grid';
+    }
+
+    function deductLife(classIndex, studentIndex) {
+      const student = classes[classIndex].students[studentIndex];
+      if (student.lives > 0) {
+        student.lives--;
+        updateLifeBar(classIndex, studentIndex);
+        saveClasses(classes);
+      } else {
+        alert(`No lives left for ${student.name}`);
+      }
+    }
+
+    function addLife(classIndex, studentIndex) {
+      const student = classes[classIndex].students[studentIndex];
+      if (student.lives < 3) {
+        student.lives++;
+        updateLifeBar(classIndex, studentIndex);
+        saveClasses(classes);
+      } else {
+        alert(`${student.name} already has full lives.`);
+      }
+    }
+
+    function updateLifeBar(classIndex, studentIndex) {
+      const student = classes[classIndex].students[studentIndex];
+      for (let i = 1; i <= 3; i++) {
+        const life = document.getElementById(`life-${classIndex}-${studentIndex}-${i}`);
+        if (i > student.lives) {
+          life.classList.add('deducted');
+        } else {
+          life.classList.remove('deducted');
+        }
+      }
     }
 
     function markAbsent(classIndex) {
       const classData = classes[classIndex];
-      classData.students.forEach(student => {
-        if (student.lives > 0) {
-          student.absent = true; // Mark student as absent
-        }
+      classData.students.forEach((student, studentIndex) => {
+        if (student.lives === 0) return; // Skip Game Over students
+        student.absent = true;
+        updateStudentStatus(classIndex, studentIndex);
+      });
+      saveClasses(classes);
+    }
+
+    function updateStudentStatus(classIndex, studentIndex) {
+      const studentDiv = document.querySelectorAll('.student')[studentIndex + classIndex * 12];
+      studentDiv.classList.toggle('absent', classes[classIndex].students[studentIndex].absent);
+    }
+
+    function resetClass(classIndex) {
+      const classData = classes[classIndex];
+      classData.students.forEach((student) => {
+        student.lives = 3;
+        student.absent = false;
       });
       saveClasses(classes);
       showStudents(classIndex);
     }
 
-    function deductLife(classIndex,    function deductLife(classIndex, studentIndex) {
-      const classData = classes[classIndex];
-      const student = classData.students[studentIndex];
-      if (student.lives > 0) {
-        student.lives--;
-        saveClasses(classes);
-        showStudents(classIndex);
-      }
-    }
-
-    function addLife(classIndex, studentIndex) {
-      const classData = classes[classIndex];
-      const student = classData.students[studentIndex];
-      if (student.lives < 3) {
-        student.lives++;
-        saveClasses(classes);
-        showStudents(classIndex);
-      }
-    }
-
     document.getElementById("class-select").addEventListener("change", (event) => {
-      const classIndex = event.target.value;
-      if (classIndex !== "") {
-        showStudents(classIndex);
+      const selectedClassIndex = event.target.value;
+      if (selectedClassIndex !== "") {
+        showStudents(selectedClassIndex);
+      } else {
+        document.getElementById("students-container").style.display = 'none';
       }
     });
 
-    // Initialize the dropdown and event listeners
     populateClassDropdown();
   </script>
 </body>
