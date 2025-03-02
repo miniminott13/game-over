@@ -178,9 +178,9 @@
 
     function showStudents(classIndex) {
       const studentsContainer = document.getElementById("students-container");
-      studentsContainer.innerHTML = '';
-      const classData = classes[classIndex];
+      studentsContainer.innerHTML = ''; // Clear any previous students
 
+      const classData = classes[classIndex];
       classData.students.forEach((student, studentIndex) => {
         const studentDiv = document.createElement('div');
         studentDiv.classList.add('student');
@@ -216,19 +216,7 @@
         studentsContainer.appendChild(studentDiv);
       });
 
-      const absentButton = document.createElement('button');
-      absentButton.classList.add('button');
-      absentButton.textContent = 'Mark Absent';
-      absentButton.onclick = () => markAbsent(classIndex);
-      studentsContainer.appendChild(absentButton);
-
-      const resetButton = document.createElement('button');
-      resetButton.classList.add('reset-button');
-      resetButton.textContent = 'Reset Class';
-      resetButton.onclick = () => resetClass(classIndex);
-      studentsContainer.appendChild(resetButton);
-
-      studentsContainer.style.display = 'grid';
+      studentsContainer.style.display = 'grid'; // Show the students container
     }
 
     function deductLife(classIndex, studentIndex) {
@@ -265,41 +253,18 @@
       }
     }
 
-    function markAbsent(classIndex) {
-      const classData = classes[classIndex];
-      classData.students.forEach((student, studentIndex) => {
-        if (student.lives === 0) return; // Skip Game Over students
-        student.absent = true;
-        updateStudentStatus(classIndex, studentIndex);
-      });
-      saveClasses(classes);
-    }
+    // Populate the class dropdown
+    populateClassDropdown();
 
-    function updateStudentStatus(classIndex, studentIndex) {
-      const studentDiv = document.querySelectorAll('.student')[studentIndex + classIndex * 12];
-      studentDiv.classList.toggle('absent', classes[classIndex].students[studentIndex].absent);
-    }
-
-    function resetClass(classIndex) {
-      const classData = classes[classIndex];
-      classData.students.forEach((student) => {
-        student.lives = 3;
-        student.absent = false;
-      });
-      saveClasses(classes);
-      showStudents(classIndex);
-    }
-
-    document.getElementById("class-select").addEventListener("change", (event) => {
-      const selectedClassIndex = event.target.value;
-      if (selectedClassIndex !== "") {
-        showStudents(selectedClassIndex);
+    // Event listener to handle class selection
+    document.getElementById('class-select').addEventListener('change', function(event) {
+      const classIndex = event.target.value;
+      if (classIndex) {
+        showStudents(classIndex);
       } else {
-        document.getElementById("students-container").style.display = 'none';
+        document.getElementById("students-container").style.display = 'none'; // Hide student grid if no class selected
       }
     });
-
-    populateClassDropdown();
   </script>
 </body>
 </html>
