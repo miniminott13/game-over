@@ -44,6 +44,10 @@
       padding: 15px;
       border-radius: 10px;
       width: 150px;
+      transition: background-color 0.3s ease;
+    }
+    .student.absent {
+      background-color: #888; /* Grey for absent students */
     }
     .student-name {
       display: block;
@@ -70,6 +74,9 @@
     .life.deducted {
       opacity: 0.3;
     }
+    .life.game-over {
+      background-color: #ff4136;
+    }
     .button, .reset-button {
       margin-top: 10px;
       padding: 10px 20px;
@@ -95,6 +102,19 @@
       border: 1px solid white;
       border-radius: 5px;
     }
+    .absent-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #f39c12;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 0.7em;
+      border-radius: 5px;
+    }
+    .absent-button:active {
+      background-color: #d35400;
+    }
   </style>
 </head>
 <body>
@@ -113,35 +133,35 @@
       {
         className: 'MAG1',
         students: [
-          { name: 'Hyun Kang', lives: 3 },
-          { name: 'William Baek', lives: 3 },
-          { name: 'Yuju Min', lives: 3 },
-          { name: 'Emma Kim', lives: 3 },
-          { name: 'Ella Ha', lives: 3 },
-          { name: 'Shawn Oh', lives: 3 },
-          { name: 'Min Kim', lives: 3 },
-          { name: 'Jane Lee', lives: 3 },
-          { name: 'Evan Jung', lives: 3 },
-          { name: 'Jenny Yoon', lives: 3 },
-          { name: 'Johann Lee', lives: 3 },
-          { name: 'Emily Joo', lives: 3 }
+          { name: 'Hyun Kang', lives: 3, absent: false },
+          { name: 'William Baek', lives: 3, absent: false },
+          { name: 'Yuju Min', lives: 3, absent: false },
+          { name: 'Emma Kim', lives: 3, absent: false },
+          { name: 'Ella Ha', lives: 3, absent: false },
+          { name: 'Shawn Oh', lives: 3, absent: false },
+          { name: 'Min Kim', lives: 3, absent: false },
+          { name: 'Jane Lee', lives: 3, absent: false },
+          { name: 'Evan Jung', lives: 3, absent: false },
+          { name: 'Jenny Yoon', lives: 3, absent: false },
+          { name: 'Johann Lee', lives: 3, absent: false },
+          { name: 'Emily Joo', lives: 3, absent: false }
         ]
       },
       {
         className: 'S1-R',
         students: [
-          { name: 'Irene Song', lives: 3 },
-          { name: 'Roy Myung', lives: 3 },
-          { name: 'Suho Park', lives: 3 },
-          { name: 'Thomas Hong', lives: 3 },
-          { name: 'Estelle Jung', lives: 3 },
-          { name: 'Allie Lee', lives: 3 },
-          { name: 'Irene Jung', lives: 3 },
-          { name: 'Sally Yang', lives: 3 },
-          { name: 'Kevin Park', lives: 3 },
-          { name: 'Evelyn Joo', lives: 3 },
-          { name: 'Jordan Oh', lives: 3 },
-          { name: 'Jenny Kim', lives: 3 }
+          { name: 'Irene Song', lives: 3, absent: false },
+          { name: 'Roy Myung', lives: 3, absent: false },
+          { name: 'Suho Park', lives: 3, absent: false },
+          { name: 'Thomas Hong', lives: 3, absent: false },
+          { name: 'Estelle Jung', lives: 3, absent: false },
+          { name: 'Allie Lee', lives: 3, absent: false },
+          { name: 'Irene Jung', lives: 3, absent: false },
+          { name: 'Sally Yang', lives: 3, absent: false },
+          { name: 'Kevin Park', lives: 3, absent: false },
+          { name: 'Evelyn Joo', lives: 3, absent: false },
+          { name: 'Jordan Oh', lives: 3, absent: false },
+          { name: 'Jenny Kim', lives: 3, absent: false }
         ]
       }
     ];
@@ -178,7 +198,14 @@
       classData.students.forEach((student, studentIndex) => {
         const studentDiv = document.createElement('div');
         studentDiv.classList.add('student');
-        studentDiv.innerHTML = `<span class="student-name">${student.name}</span>`;
+        
+        // Mark student as absent with greyed-out background
+        if (student.absent) {
+          studentDiv.classList.add('absent');
+        }
+
+        const studentName = student.lives > 0 ? student.name : 'Absent';
+        studentDiv.innerHTML = `<span class="student-name">${studentName}</span>`;
 
         const lifeBar = document.createElement('div');
         lifeBar.classList.add('life-bar');
@@ -188,6 +215,9 @@
           life.id = `life-${classIndex}-${studentIndex}-${i}`;
           if (i > student.lives) {
             life.classList.add('deducted');
+          }
+          if (student.lives === 0) {
+            life.classList.add('game-over');
           }
           lifeBar.appendChild(life);
         }
@@ -213,65 +243,55 @@
         studentsContainer.appendChild(studentDiv);
       });
 
-      // Create a reset button for the entire class
-      const resetButton = document.createElement('button');
-      resetButton.classList.add('reset-button');
-      resetButton.textContent = 'Reset Class';
-      resetButton.onclick = () => resetClass(classIndex);
-      studentsContainer.appendChild(resetButton);
+      // Create a button to mark multiple students as absent
+      const absentButton = document.createElement('button');
+      absentButton.classList.add('absent-button');
+      absentButton.textContent = 'Mark Absent';
+      absentButton.onclick = () => markAbsent(classIndex);
+      studentsContainer.appendChild(absentButton);
 
       studentsContainer.style.display = 'grid';
     }
 
-    function deductLife(classIndex, studentIndex) {
-      const student = classes[classIndex].students[studentIndex];
-      if (student.lives > 0) {
-        student.lives--;
-        updateLifeBar(classIndex, studentIndex);
-        saveClasses(classes);
-      } else {
-        alert(`No lives left for ${student.name}`);
-      }
-    }
-
-    function addLife(classIndex, studentIndex) {
-      const student = classes[classIndex].students[studentIndex];
-      if (student.lives < 3) {
-        student.lives++;
-        updateLifeBar(classIndex, studentIndex);
-        saveClasses(classes);
-      } else {
-        alert(`${student.name} already has 3 lives!`);
-      }
-    }
-
-    function updateLifeBar(classIndex, studentIndex) {
-      const student = classes[classIndex].students[studentIndex];
-      const hearts = document.querySelectorAll(
-        `#life-${classIndex}-${studentIndex}-1, 
-         #life-${classIndex}-${studentIndex}-2, 
-         #life-${classIndex}-${studentIndex}-3`
-      );
-      hearts.forEach((heart, index) => {
-        if (index < student.lives) {
-          heart.classList.remove('deducted');
-        } else {
-          heart.classList.add('deducted');
+    function markAbsent(classIndex) {
+      const classData = classes[classIndex];
+      classData.students.forEach(student => {
+        if (student.lives > 0) {
+          student.absent = true; // Mark student as absent
         }
       });
-    }
-
-    function resetClass(classIndex) {
-      // Reset all students' lives to 3 for the selected class
-      classes[classIndex].students.forEach(student => student.lives = 3);
       saveClasses(classes);
       showStudents(classIndex);
     }
 
-    document.getElementById("class-select").addEventListener("change", function() {
-      if (this.value !== "") showStudents(this.value);
+    function deductLife(classIndex,    function deductLife(classIndex, studentIndex) {
+      const classData = classes[classIndex];
+      const student = classData.students[studentIndex];
+      if (student.lives > 0) {
+        student.lives--;
+        saveClasses(classes);
+        showStudents(classIndex);
+      }
+    }
+
+    function addLife(classIndex, studentIndex) {
+      const classData = classes[classIndex];
+      const student = classData.students[studentIndex];
+      if (student.lives < 3) {
+        student.lives++;
+        saveClasses(classes);
+        showStudents(classIndex);
+      }
+    }
+
+    document.getElementById("class-select").addEventListener("change", (event) => {
+      const classIndex = event.target.value;
+      if (classIndex !== "") {
+        showStudents(classIndex);
+      }
     });
 
+    // Initialize the dropdown and event listeners
     populateClassDropdown();
   </script>
 </body>
