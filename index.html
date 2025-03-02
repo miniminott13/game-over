@@ -224,15 +224,33 @@
     }
 
     function deductLife(classIndex, studentIndex) {
-      const student = classes[classIndex].students[studentIndex];
-      if (student.lives > 0) {
-        student.lives--;
-        updateLifeBar(classIndex, studentIndex);
-        saveClasses(classes);
-      } else {
-        alert(`No lives left for ${student.name}`);
-      }
-    }
+   const student = classes[classIndex].students[studentIndex];
+   if (student.lives > 0) {
+     student.lives--;
+     updateLifeBar(classIndex, studentIndex);
+
+     // Trigger bounce animation
+     const lifeHearts = document.querySelectorAll(
+       `#life-${classIndex}-${studentIndex}-1, 
+        #life-${classIndex}-${studentIndex}-2, 
+        #life-${classIndex}-${studentIndex}-3`
+     );
+     lifeHearts.forEach((life, index) => {
+       if (index < student.lives) {
+         life.classList.remove('deducted');
+       } else {
+         life.classList.add('deducted');
+         // Add bounce animation class
+         life.classList.add('bounce');
+         setTimeout(() => life.classList.remove('bounce'), 1000); // Remove bounce after animation
+       }
+     });
+     
+     saveClasses(classes);
+   } else {
+     alert(`No lives left for ${student.name}`);
+   }
+ }
 
     function addLife(classIndex, studentIndex) {
       const student = classes[classIndex].students[studentIndex];
