@@ -70,12 +70,6 @@
     .life.deducted {
       opacity: 0.3;
     }
-    .game-over {
-      background-color: grey;
-    }
-    .absent {
-      background-color: #808080;
-    }
     .button, .reset-button {
       margin-top: 10px;
       padding: 10px 20px;
@@ -104,7 +98,7 @@
   </style>
 </head>
 <body>
-  <h1>Behavior Chart</h1>
+  <h1>Game Start</h1>
 
   <label for="class-select">Select Class:</label>
   <select id="class-select">
@@ -119,35 +113,35 @@
       {
         className: 'MAG1',
         students: [
-          { name: 'Hyun Kang', lives: 3, absent: false },
-          { name: 'William Baek', lives: 3, absent: false },
-          { name: 'Yuju Min', lives: 3, absent: false },
-          { name: 'Emma Kim', lives: 3, absent: false },
-          { name: 'Ella Ha', lives: 3, absent: false },
-          { name: 'Shawn Oh', lives: 3, absent: false },
-          { name: 'Min Kim', lives: 3, absent: false },
-          { name: 'Jane Lee', lives: 3, absent: false },
-          { name: 'Evan Jung', lives: 3, absent: false },
-          { name: 'Jenny Yoon', lives: 3, absent: false },
-          { name: 'Johann Lee', lives: 3, absent: false },
-          { name: 'Emily Joo', lives: 3, absent: false }
+          { name: 'Hyun Kang', lives: 3 },
+          { name: 'William Baek', lives: 3 },
+          { name: 'Yuju Min', lives: 3 },
+          { name: 'Emma Kim', lives: 3 },
+          { name: 'Ella Ha', lives: 3 },
+          { name: 'Shawn Oh', lives: 3 },
+          { name: 'Min Kim', lives: 3 },
+          { name: 'Jane Lee', lives: 3 },
+          { name: 'Evan Jung', lives: 3 },
+          { name: 'Jenny Yoon', lives: 3 },
+          { name: 'Johann Lee', lives: 3 },
+          { name: 'Emily Joo', lives: 3 }
         ]
       },
       {
         className: 'S1-R',
         students: [
-          { name: 'Irene Song', lives: 3, absent: false },
-          { name: 'Roy Myung', lives: 3, absent: false },
-          { name: 'Suho Park', lives: 3, absent: false },
-          { name: 'Thomas Hong', lives: 3, absent: false },
-          { name: 'Estelle Jung', lives: 3, absent: false },
-          { name: 'Allie Lee', lives: 3, absent: false },
-          { name: 'Irene Jung', lives: 3, absent: false },
-          { name: 'Sally Yang', lives: 3, absent: false },
-          { name: 'Kevin Park', lives: 3, absent: false },
-          { name: 'Evelyn Joo', lives: 3, absent: false },
-          { name: 'Jordan Oh', lives: 3, absent: false },
-          { name: 'Jenny Kim', lives: 3, absent: false }
+          { name: 'Irene Song', lives: 3 },
+          { name: 'Roy Myung', lives: 3 },
+          { name: 'Suho Park', lives: 3 },
+          { name: 'Thomas Hong', lives: 3 },
+          { name: 'Estelle Jung', lives: 3 },
+          { name: 'Allie Lee', lives: 3 },
+          { name: 'Irene Jung', lives: 3 },
+          { name: 'Sally Yang', lives: 3 },
+          { name: 'Kevin Park', lives: 3 },
+          { name: 'Evelyn Joo', lives: 3 },
+          { name: 'Jordan Oh', lives: 3 },
+          { name: 'Jenny Kim', lives: 3 }
         ]
       }
     ];
@@ -167,24 +161,23 @@
     let classes = loadClasses();
 
     function populateClassDropdown() {
-      const selectElement = document.getElementById("class-select");
-      classes.forEach((classData, index) => {
-        const option = document.createElement("option");
-        option.value = index;
-        option.textContent = classData.className;
-        selectElement.appendChild(option);
-      });
-    }
+  const selectElement = document.getElementById("class-select");
+  defaultClasses.forEach((classData, index) => {
+    const option = document.createElement("option");
+    option.value = index;
+    option.textContent = classData.className;
+    selectElement.appendChild(option);
+  });
+}
 
     function showStudents(classIndex) {
       const studentsContainer = document.getElementById("students-container");
-      studentsContainer.innerHTML = ''; // Clear any previous students
-
+      studentsContainer.innerHTML = '';
       const classData = classes[classIndex];
+
       classData.students.forEach((student, studentIndex) => {
         const studentDiv = document.createElement('div');
         studentDiv.classList.add('student');
-        studentDiv.classList.add(student.lives === 0 ? 'game-over' : student.absent ? 'absent' : '');
         studentDiv.innerHTML = `<span class="student-name">${student.name}</span>`;
 
         const lifeBar = document.createElement('div');
@@ -203,12 +196,16 @@
         const deductButton = document.createElement('button');
         deductButton.classList.add('button');
         deductButton.textContent = `Deduct Life`;
-        deductButton.onclick = () => deductLife(classIndex, studentIndex);
+        deductButton.onclick = () => {
+          deductLife(classIndex, studentIndex);
+        };
 
         const addButton = document.createElement('button');
         addButton.classList.add('button');
         addButton.textContent = `Add Life`;
-        addButton.onclick = () => addLife(classIndex, studentIndex);
+        addButton.onclick = () => {
+          addLife(classIndex, studentIndex);
+        };
 
         studentDiv.appendChild(deductButton);
         studentDiv.appendChild(addButton);
@@ -216,7 +213,14 @@
         studentsContainer.appendChild(studentDiv);
       });
 
-      studentsContainer.style.display = 'grid'; // Show the students container
+      // Create a reset button for the entire class
+      const resetButton = document.createElement('button');
+      resetButton.classList.add('reset-button');
+      resetButton.textContent = 'Reset Class';
+      resetButton.onclick = () => resetClass(classIndex);
+      studentsContainer.appendChild(resetButton);
+
+      studentsContainer.style.display = 'grid';
     }
 
     function deductLife(classIndex, studentIndex) {
@@ -237,34 +241,38 @@
         updateLifeBar(classIndex, studentIndex);
         saveClasses(classes);
       } else {
-        alert(`${student.name} already has full lives.`);
+        alert(`${student.name} already has 3 lives!`);
       }
     }
 
     function updateLifeBar(classIndex, studentIndex) {
       const student = classes[classIndex].students[studentIndex];
-      for (let i = 1; i <= 3; i++) {
-        const life = document.getElementById(`life-${classIndex}-${studentIndex}-${i}`);
-        if (i > student.lives) {
-          life.classList.add('deducted');
+      const hearts = document.querySelectorAll(
+        `#life-${classIndex}-${studentIndex}-1, 
+         #life-${classIndex}-${studentIndex}-2, 
+         #life-${classIndex}-${studentIndex}-3`
+      );
+      hearts.forEach((heart, index) => {
+        if (index < student.lives) {
+          heart.classList.remove('deducted');
         } else {
-          life.classList.remove('deducted');
+          heart.classList.add('deducted');
         }
-      }
+      });
     }
 
-    // Populate the class dropdown
-    populateClassDropdown();
+    function resetClass(classIndex) {
+      // Reset all students' lives to 3 for the selected class
+      classes[classIndex].students.forEach(student => student.lives = 3);
+      saveClasses(classes);
+      showStudents(classIndex);
+    }
 
-    // Event listener to handle class selection
-    document.getElementById('class-select').addEventListener('change', function(event) {
-      const classIndex = event.target.value;
-      if (classIndex) {
-        showStudents(classIndex);
-      } else {
-        document.getElementById("students-container").style.display = 'none'; // Hide student grid if no class selected
-      }
+    document.getElementById("class-select").addEventListener("change", function() {
+      if (this.value !== "") showStudents(this.value);
     });
+
+    populateClassDropdown();
   </script>
 </body>
 </html>
