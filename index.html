@@ -161,14 +161,14 @@
     let classes = loadClasses();
 
     function populateClassDropdown() {
-  const selectElement = document.getElementById("class-select");
-  defaultClasses.forEach((classData, index) => {
-    const option = document.createElement("option");
-    option.value = index;
-    option.textContent = classData.className;
-    selectElement.appendChild(option);
-  });
-}
+      const selectElement = document.getElementById("class-select");
+      defaultClasses.forEach((classData, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = classData.className;
+        selectElement.appendChild(option);
+      });
+    }
 
     function showStudents(classIndex) {
       const studentsContainer = document.getElementById("students-container");
