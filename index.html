@@ -223,17 +223,29 @@
       studentsContainer.style.display = 'grid';
     }
 
-    function deductLife(classIndex, studentIndex) {
-      const student = classes[classIndex].students[studentIndex];
-      if (student.lives > 0) {
-        student.lives--;
-        updateLifeBar(classIndex, studentIndex);
-        saveClasses(classes);
-      } else {
-        alert(`No lives left for ${student.name}`);
-      }
-    }
+   function deductLife(classIndex, studentIndex) {
+  const student = classes[classIndex].students[studentIndex];
+  if (student.lives > 0) {
+    student.lives--;
+    updateLifeBar(classIndex, studentIndex);
+    saveClasses(classes);
+  }
+  if (student.lives === 0) {
+    showGameOver(classIndex, studentIndex);
+  }
+}
 
+function showGameOver(classIndex, studentIndex) {
+  const studentDiv = document.querySelectorAll('.student')[studentIndex];
+  
+  // Check if "GAME OVER" text already exists
+  if (!studentDiv.querySelector('.game-over')) {
+    const gameOverText = document.createElement('div');
+    gameOverText.classList.add('game-over');
+    gameOverText.textContent = "GAME OVER";
+    studentDiv.appendChild(gameOverText);
+  }
+}
     function addLife(classIndex, studentIndex) {
       const student = classes[classIndex].students[studentIndex];
       if (student.lives < 3) {
@@ -244,7 +256,22 @@
         alert(`${student.name} already has 3 lives!`);
       }
     }
-
+    .game-over {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2em;
+  font-weight: bold;
+  color: red;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-transform: uppercase;
+}
+.student {
+  position: relative; /* Needed for absolute positioning */
+}
     function updateLifeBar(classIndex, studentIndex) {
       const student = classes[classIndex].students[studentIndex];
       const hearts = document.querySelectorAll(
